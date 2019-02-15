@@ -1,16 +1,23 @@
-import React, {useState} from 'react'
-import Usertable from './tables/UserTable'
+import React, { useState, Fragment } from 'react'
 import AddUserForm from './forms/AddUserForm'
+import EditUserForm from './forms/EditUserForm'
+import UserTable from './tables/UserTable'
 
 const App = () => {
 
-  const usersData = [
-    { id: 1, name: 'Kadar', username: 'kazzak' },
-    { id: 2, name: 'Kaducus', username: 'timermaw' },
-    { id: 3, name: 'ElajtVolvo', username: 'maxmax' },
-  ]
+	const usersData = [
+		{ id: 1, name: 'Kadar', username: 'Eevee' },
+		{ id: 2, name: 'Kaducus', username: 'beebee' },
+		{ id: 3, name: 'ElajtVolvo', username: 'meemee' },
+	]
 
-	const [ users,setUsers ] = useState(usersData)
+	const initialFormState = { id: null, name: '', username: '' }
+
+
+	const [ users, setUsers ] = useState(usersData)
+	const [ currentUser, setCurrentUser ] = useState(initialFormState)
+	const [ editing, setEditing ] = useState(false)
+
 
 	const addUser = user => {
 		user.id = users.length + 1
@@ -18,26 +25,52 @@ const App = () => {
 	}
 
 	const deleteUser = id => {
+		setEditing(false)
+
 		setUsers(users.filter(user => user.id !== id))
 	}
 
-	console.log('my user', users)
+	const updateUser = (id, updatedUser) => {
+		setEditing(false)
+
+		setUsers(users.map(user => (user.id === id ? updatedUser : user)))
+	}
+
+	const editRow = user => {
+		setEditing(true)
+
+		setCurrentUser({ id: user.id, name: user.name, username: user.username })
+	}
 
 	return (
-
 		<div className="container">
 			<h1>CRUD App with Hooks</h1>
 			<div className="flex-row">
 				<div className="flex-large">
-					<h2>Add user</h2>
-					<AddUserForm addUser={addUser} />
+					{editing ? (
+						<Fragment>
+							<h2>Edit user</h2>
+							<EditUserForm
+								editing={editing}
+								setEditing={setEditing}
+								currentUser={currentUser}
+								updateUser={updateUser}
+							/>
+						</Fragment>
+					) : (
+						<Fragment>
+							<h2>Add user</h2>
+							<AddUserForm addUser={addUser} />
+						</Fragment>
+					)}
 				</div>
 				<div className="flex-large">
-          <h2>View users</h2>
-          <Usertable users={users} deleteUser={deleteUser}/>
+					<h2>View users</h2>
+					<UserTable users={users} editRow={editRow} deleteUser={deleteUser} />
 				</div>
 			</div>
 		</div>
 	)
 }
-export default App;
+
+export default App
